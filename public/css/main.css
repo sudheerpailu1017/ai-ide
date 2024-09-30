@@ -1,0 +1,33 @@
+/* Main layout */
+.ide-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  padding: 10px;
+}
+
+textarea#editor {
+  flex-grow: 1;
+  width: 100%;
+  height: 80%;
+  background-color: #1e1e1e;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-family: "Courier New", Courier, monospace;
+}
+
+pre#output {
+  background-color: #1e1e1e;
+  color: white;
+  padding: 10px;
+  border-top: 1px solid #333;
+  height: 20%;
+  overflow-y: auto;
+}

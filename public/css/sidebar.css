@@ -1,0 +1,36 @@
+/* Sidebar layout */
+.sidebar {
+  width: 250px;
+  background-color: #252526;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.file-tree {
+  list-style: none;
+  padding: 0;
+  color: white;
+}
+
+.file-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.file-item:hover {
+  background-color: #444;
+}
+
+.active-file {
+  background-color: #007acc;
+  color: white;
+}
