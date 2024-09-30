@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 project-root/
 ├── static/
 │   ├── css/
@@ -11,3 +12,6 @@ project-root/
 ├── templates/
 │   └── index.html             # Main HTML structure
 └── app.py                     # Flask app
+=======
+# ai-ide
+>>>>>>> 28a0bddcd4feadea20dee2c255f0fa15a7ba82a1
