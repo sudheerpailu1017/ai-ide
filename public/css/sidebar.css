@@ -1,36 +1,145 @@
 /* Sidebar layout */
 .sidebar {
-  width: 250px;
-  background-color: #252526;
+  width: 180px;
+  background-color: #1e1e1e;  /* Darker background for sidebar */
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 15px 10px;
+  position: relative;
+  justify-content: space-between;  /* Keeps the file tree at the top and add button at the bottom */
+  box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.2);  /* Add subtle shadow for depth */
 }
 
-.sidebar-header {
+
+.file-tree-container {
+  width: 250px;
+  background-color: #1e1e1e;
+  color: white;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-tree-header {
   display: flex;
   justify-content: space-between;
-  color: white;
-  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #252526;
+  border-bottom: 1px solid #444;  
+  align-items: center;
+  color: #f7f7f7;
+  font-weight: bold;
+  font-size: 14px;
 }
 
+/* File Tree Styling */
 .file-tree {
   list-style: none;
   padding: 0;
-  color: white;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;  /* Allows scrolling for long lists of files */
 }
 
+/* Individual File Item Styling */
 .file-item {
-  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  background-color: #333;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  color:white;
 }
 
 .file-item:hover {
   background-color: #444;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);  /* Add hover shadow for depth */
 }
 
-.active-file {
-  background-color: #007acc;
+.file-item.selected {
+  background-color: #bcc1c5;
   color: white;
 }
+
+/* File name styling */
+.file-name {
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;  /* Modern font for cleaner appearance */
+  flex-grow: 1; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #ffffff;
+  margin-left: 5px;
+}
+
+/* File Icon Styling */
+.file-item::before {
+  margin-right: 10px;
+}
+
+/* Edit and delete icons */
+.edit-file, .delete-file {
+  cursor: pointer;
+  margin-left: 8px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.2s, opacity 0.2s ease;
+  font-size: 14px;
+}
+
+.file-item:hover .edit-file,
+.file-item:hover .delete-file {
+  visibility: visible;
+  opacity: 1;
+}
+
+.edit-file {
+  color: rgb(250, 249, 249);
+}
+
+.delete-file {
+  color: rgb(252, 249, 249);
+}
+
+/* Add File Button Styling */
+.add-file-btn {
+  align-self: flex-end;
+  margin-bottom: 20px;
+  background: none;
+  border: none;
+  color: #f7f7f7;
+  font-size: 20px;  /* Larger icon for better visibility */
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.add-file-btn:hover {
+  color: #007bff;
+  transform: scale(1.1);  /* Add subtle scaling effect on hover */
+}
+
+.add-file-btn:active {
+  color: #0056b3;
+  transform: scale(1);  /* Revert scaling when clicked */
+}
+
+/* Scrollbar styling for file tree */
+.file-tree::-webkit-scrollbar {
+  width: 8px;
+}
+
+.file-tree::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 10px;
+}
+
+.file-tree::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+

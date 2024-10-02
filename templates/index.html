@@ -1,35 +1,21 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Python IDE</title>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
   <!-- CodeMirror CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
-  
+
   <!-- Custom CSS for Layout and File Tree -->
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
 
     /* Sidebar Container */
-    .file-tree-container {
-      width: 250px;
-      background-color: #2e2e2e;
-      color: white;
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
     .file-tree-container h3 {
       margin-top: 0;
       font-size: 1.2em;
@@ -61,35 +47,6 @@
       color: white;
     }
 
-    /* Main content and editor styling */
-    .main-content {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-      background-color: #1e1e1e;
-    }
-
-    textarea#editor {
-      flex-grow: 1;
-      width: 100%;
-      height: 80%;
-      background-color: #1e1e1e;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-family: "Courier New", Courier, monospace;
-    }
-
-    pre#output {
-      background-color: #1e1e1e;
-      color: white;
-      padding: 10px;
-      border-top: 1px solid #333;
-      height: 20%;
-      overflow-y: auto;
-    }
-
     /* Buttons for File Operations */
     .file-operations {
       display: flex;
@@ -110,49 +67,73 @@
     .file-operations button:hover {
       background-color: #0056b3;
     }
+
   </style>
 </head>
 <body>
 
-  <!-- File Tree Sidebar -->
-  <div class="file-tree-container">
-    <h3>File Tree</h3>
+<!-- File Tree Sidebar -->
+<div class="file-tree-container">
 
-    <!-- Buttons for file operations -->
-    <div class="file-operations">
-      <button class="create-file-btn">New File</button>
-      <button class="delete-file-btn">Delete File</button>
-    </div>
+  <!-- Floating Add File Button with FontAwesome Icon -->
+  <button class="add-file-btn"><i class="fas fa-plus"></i></button>
 
-    <!-- File tree where file list will be inserted dynamically -->
-    <ul class="file-tree">
-      <!-- Files will be loaded here dynamically -->
-    </ul>
-  </div>
+  <!-- File tree where file list will be inserted dynamically -->
+  <ul class="file-tree">
+    <li class="file-item">
+      <span class="file-name">file1.py</span>
+      <span class="edit-file"><i class="fas fa-pencil-alt"></i></span>
+      <span class="delete-file"><i class="fas fa-trash-alt"></i></span>
+      </li>
+  </ul>
+
+</div>
 
   <!-- Main Content -->
   <div class="main-content">
     <!-- Code Editor -->
     <textarea id="editor"></textarea>
-    
-    <!-- Run Code Button -->
-    <button class="run-btn">Run Code</button>
+
+    <!-- Container for Run Code and Write with AI Buttons -->
+    <div class="button-container">
+      <button class="ai-btn">
+        <i class="fas fa-lightbulb"></i> Write with Lyzr-AI
+      </button>
+      <!-- Run button with play icon -->
+      <button class="run-btn">
+        <i class="fas fa-play"></i> RUN
+      </button>
+    </div>
 
     <!-- Output Section -->
     <pre id="output"></pre>
   </div>
 
-  <!-- CodeMirror JS -->
+  <!-- Load CodeMirror JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+
+  <!-- Load Pyodide -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js"></script>
+
+  <!-- Load your custom editor.js after CodeMirror and Pyodide -->
+  <script src="public/js/editor.js"></script>
+
+  <!-- Load the fileTree.js file for managing the file tree -->
+  <script src="public/js/fileTree.js"></script>
+
+  <!-- Link the main content CSS -->
+  <link rel="stylesheet" href="public/css/main.css">
+
+  <!-- Link the sidebar CSS -->
+  <link rel="stylesheet" href="public/css/sidebar.css">
 
   <!-- CodeMirror Hint Add-ons -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/anyword-hint.min.js"></script>
 
-  <!-- File Tree and Editor Logic -->
-  <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/fileManager.js') }}"></script>
+  <!-- CodeMirror Hint CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
 
 </body>
 </html>
