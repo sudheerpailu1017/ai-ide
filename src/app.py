@@ -17,6 +17,7 @@ def format_code(code):
     indent_level = 0
     indent_size = 4  # Default Python indentation size (4 spaces)
     formatted_code = ''
+    
     for line in lines:
         trimmed_line = line.strip()
 
@@ -25,33 +26,40 @@ def format_code(code):
             formatted_code += '\n'
             continue
 
-        # If the line ends with a colon (e.g., for loops, if statements)
+        # Apply the current indentation level to the line
+        formatted_code += ' ' * indent_level + trimmed_line + '\n'
+
+        # If the line ends with a colon (for loops, if statements, function definitions), increase indentation
         if trimmed_line.endswith(':'):
-            formatted_code += ' ' * indent_level + trimmed_line + '\n'
             indent_level += indent_size
-        elif trimmed_line.startswith(('return', 'elif', 'else')):
-            # Reduce indentation for 'return', 'elif', and 'else'
+
+        # Decrease indentation for 'return', 'elif', 'else', 'except', and 'finally'
+        elif trimmed_line.startswith(('return', 'elif', 'else', 'except', 'finally')):
             indent_level = max(0, indent_level - indent_size)
-            formatted_code += ' ' * indent_level + trimmed_line + '\n'
-        else:
-            formatted_code += ' ' * indent_level + trimmed_line + '\n'
 
     return formatted_code
 
 @app.route('/format_code', methods=['POST'])
 def format_code_endpoint():
-    # Get the code from the request
-    data = request.get_json()
-    code = data.get('code', '')
+    try:
+        # Get the code from the request
+        data = request.get_json()
 
-    if not code:
-        return jsonify({'error': 'No code provided'}), 400
+        # Ensure the request has 'code' in the payload
+        code = data.get('code', '')
+        if not code:
+            return jsonify({'error': 'No code provided'}), 400
 
-    # Format the code
-    formatted_code = format_code(code)
+        # Format the code using the provided function
+        formatted_code = format_code(code)
 
-    # Return the formatted code
-    return jsonify({'formatted_code': formatted_code})
+        # Return the formatted code as JSON response
+        return jsonify({'formatted_code': formatted_code}), 200
+
+    except Exception as e:
+        # If any unexpected error occurs, handle gracefully
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

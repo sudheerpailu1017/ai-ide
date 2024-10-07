@@ -336,7 +336,6 @@ function applyFormattedCode(formattedCode) {
 }
 
 // Function to handle indentation and spaces after newlines (\n)
-// Function to handle indentation and spaces after newlines (\n)
 function handleIndentationAndSpaces(code) {
   // Split the code into individual lines based on newline characters (\n)
   let lines = code.split('\n');
