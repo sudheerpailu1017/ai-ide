@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,15 +12,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
 
   <!-- Custom CSS for Layout and File Tree -->
-  <style>
+  <link rel="stylesheet" href="public/css/main.css">
+  <link rel="stylesheet" href="public/css/sidebar.css">
 
-    /* Sidebar Container */
+  <!-- Inline styles for additional customization -->
+  <style>
+    /* Inline styles for quick customization */
     .file-tree-container h3 {
       margin-top: 0;
       font-size: 1.2em;
     }
 
-    /* File Tree Styling */
     .file-tree {
       list-style: none;
       padding: 0;
@@ -41,13 +42,11 @@
       background-color: #444;
     }
 
-    /* Highlight the selected file */
     .file-tree li.selected {
       background-color: #007bff;
       color: white;
     }
 
-    /* Buttons for File Operations */
     .file-operations {
       display: flex;
       justify-content: space-between;
@@ -67,39 +66,35 @@
     .file-operations button:hover {
       background-color: #0056b3;
     }
-
   </style>
 </head>
 <body>
 
-<!-- File Tree Sidebar -->
-<div class="file-tree-container">
+  <!-- File Tree Sidebar -->
+  <div class="file-tree-container">
+    <!-- Floating Add File Button -->
+    <button class="add-file-btn"><i class="fas fa-plus"></i></button>
 
-  <!-- Floating Add File Button with FontAwesome Icon -->
-  <button class="add-file-btn"><i class="fas fa-plus"></i></button>
-
-  <!-- File tree where file list will be inserted dynamically -->
-  <ul class="file-tree">
-    <li class="file-item">
-      <span class="file-name">file1.py</span>
-      <span class="edit-file"><i class="fas fa-pencil-alt"></i></span>
-      <span class="delete-file"><i class="fas fa-trash-alt"></i></span>
+    <!-- File tree -->
+    <ul class="file-tree">
+      <li class="file-item">
+        <span class="file-name">file1.py</span>
+        <span class="edit-file"><i class="fas fa-pencil-alt"></i></span>
+        <span class="delete-file"><i class="fas fa-trash-alt"></i></span>
       </li>
-  </ul>
-
-</div>
+    </ul>
+  </div>
 
   <!-- Main Content -->
   <div class="main-content">
     <!-- Code Editor -->
     <textarea id="editor"></textarea>
 
-    <!-- Container for Run Code and Write with AI Buttons -->
+    <!-- Button Container -->
     <div class="button-container">
       <button class="ai-btn">
         <i class="fas fa-lightbulb"></i> Write with Lyzr-AI
       </button>
-      <!-- Run button with play icon -->
       <button class="run-btn">
         <i class="fas fa-play"></i> RUN
       </button>
@@ -114,7 +109,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
 
   <!-- Load Pyodide -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
 
   <!-- Load your custom editor.js after CodeMirror and Pyodide -->
   <script src="public/js/editor.js"></script>
@@ -122,18 +117,12 @@
   <!-- Load the fileTree.js file for managing the file tree -->
   <script src="public/js/fileTree.js"></script>
 
-  <!-- Link the main content CSS -->
-  <link rel="stylesheet" href="public/css/main.css">
-
-  <!-- Link the sidebar CSS -->
-  <link rel="stylesheet" href="public/css/sidebar.css">
-
   <!-- CodeMirror Hint Add-ons -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/anyword-hint.min.js"></script>
 
   <!-- CodeMirror Hint CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
-
+  
 </body>
 </html>
