@@ -18,6 +18,7 @@ def format_code(code):
     indent_level = 0
     indent_size = 4  # Default Python indentation size (4 spaces)
     formatted_code = ''
+    previous_line_ended_with_colon = False  # Track if previous line was a control statement ending with a colon
     
     for i, line in enumerate(lines):
         trimmed_line = line.strip()
@@ -29,25 +30,24 @@ def format_code(code):
             formatted_code += '\n'
             continue
 
-        # Apply indentation before appending the line
-        if trimmed_line.startswith(('return', 'elif', 'else', 'except', 'finally', 'if')):
+        # Handle indentation for lines that should follow control statements
+        if previous_line_ended_with_colon:
             formatted_code += ' ' * indent_level + trimmed_line + '\n'
-
+            previous_line_ended_with_colon = False
         else:
-            # Apply current indentation level to non-control flow lines
             formatted_code += ' ' * indent_level + trimmed_line + '\n'
 
-        # Increase indentation for control flow structures
-        if trimmed_line.endswith(':') and not trimmed_line.startswith(('return', 'elif', 'if', 'else', 'except', 'finally')):
+        # Check if the current line ends with a colon (control flow structure)
+        if trimmed_line.endswith(':'):
             indent_level += indent_size
+            previous_line_ended_with_colon = True  # Mark that this line requires indentation for the next line
 
-        # Handle dedentation for 'else', 'elif', 'finally', 'except', and 'return'
+        # Handle dedentation for 'else', 'elif', 'except', 'finally', and 'return'
         if trimmed_line.startswith(('return', 'elif', 'else', 'except', 'finally')) and not trimmed_line.endswith(':'):
             indent_level = max(0, indent_level - indent_size)
 
     # Remove any excessive newlines at the end
     return formatted_code.rstrip() + '\n'
-
 
 @app.route('/format_code', methods=['POST'])
 def format_code_endpoint():
