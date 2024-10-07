@@ -13,21 +13,11 @@ const files = {
 let currentFile = 'file1.py'; // The currently active file
 
 document.addEventListener('DOMContentLoaded', () => {
-  const outputElement = document.getElementById('output');
-
-  // Set initial content for the output area
-  outputElement.innerHTML = `
-    <strong>Output:</strong><br>
-    Click on <strong>RUN</strong> button to see the output.
-  `;
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
   const addFileButton = document.querySelector('.add-file-btn');
   const fileTree = document.querySelector('.file-tree');
   const editorElement = document.getElementById('editor');
   const runCodeBtn = document.querySelector('.run-btn');  // Button to run code
+  const lyzrAiBtn = document.querySelector('.ai-btn');  // "Write with Lyzr-AI" button
   const outputElement = document.getElementById('output');  // Where output will be shown
 
   // Initialize CodeMirror editor
@@ -41,17 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load the content of the initial file into the editor
     editor.setValue(files[currentFile]);
 
-    // Add a keyup event listener to detect user typing
-    editor.on('keyup', (cm, event) => {
-      const content = cm.getValue();
-      // Start debounce timer (wait for the user to stop typing)
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        console.log('User stopped typing, sending to API for suggestion');
-        sendToApiForSuggestion(content);  // Call the API to get suggestions
-      }, 1500);  // Wait for 1500ms after the user stops typing
-    });
-
     // Handle Tab key to confirm the suggestion
     editor.on('keydown', (cm, event) => {
       if (event.key === 'Tab' && currentSuggestion && suggestionActive) {
@@ -59,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Tab pressed, confirming suggestion');
         confirmSuggestion();  // Confirm the suggestion and make it part of the actual code
       }
+    });
+
+    // Only trigger Lyzr-AI suggestion when the "Write with Lyzr-AI" button is clicked
+    lyzrAiBtn.addEventListener('click', () => {
+      const content = editor.getValue();  // Get the current editor content
+      console.log("Sending code for Lyzr-AI suggestion:", content);  // Log the code being sent
+      sendToApiForSuggestion(content);  // Call the API to get suggestions
     });
 
     // Load Pyodide before using it
@@ -111,80 +97,59 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     console.error('Editor element not found.');
   }
-
-  // Function to switch the editor content based on the selected file
-  function loadFileContent(fileName) {
-    if (files[fileName]) {
-      editor.setValue(files[fileName]);  // Load file content into the editor
-    } else {
-      editor.setValue('');  // If it's a new file, initialize with empty content
-    }
-    currentFile = fileName;  // Set the current file
-  }
-
-  // Event listener for clicking on a file
-  fileTree.addEventListener('click', (e) => {
-    if (e.target && e.target.matches('.file-item')) {
-      const selectedFile = e.target.textContent.trim();
-
-      // Save the current file's content before switching
-      files[currentFile] = editor.getValue();
-
-      // Switch to the selected file
-      loadFileContent(selectedFile);
-
-      // Update the selected file class
-      document.querySelectorAll('.file-item').forEach(item => {
-        item.classList.remove('selected');
-      });
-      e.target.classList.add('selected');
-    }
-  });
 });
 
-// Function to load Pyodide and assign it to the global variable
-async function loadPyodideInstance() {
-  try {
-    console.log("Loading Pyodide...");
-    pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.21.3/full/"
-    });
-    console.log("Pyodide loaded and ready.");
-  } catch (error) {
-    console.error("Failed to load Pyodide:", error);
-    throw error;  // Ensure that we don't proceed if loading fails
+// When you receive the cleaned code from verifyLyzrSuggestion
+async function handleLyzrSuggestion() {
+  const fullCode = editor.getValue();  // Get the current content of the editor
+  console.log("Received code before Lyzr-AI suggestion:", fullCode);
+
+  // Step 1: Verify the Lyzr suggestion using OpenAI (cleaning the code)
+  const lyzrOutput = await verifyLyzrSuggestion(fullCode);  // Removed extra argument 'lyzrOutput'
+  console.log("Verified Lyzr Output:", lyzrOutput);
+
+  if (lyzrOutput) {
+    // Step 2: Suggest the cleaned and verified Lyzr output to the editor
+    showAutocompleteSuggestion(lyzrOutput);
   }
 }
 
 // Function to call the API for suggestions
 function sendToApiForSuggestion(content) {
   const cursor = editor.getCursor();  // Get the current cursor position
-  const currentLine = editor.getLine(cursor.line);  // Get the current line of code
+  const fullCode = editor.getValue();  // Get the entire content of the editor
 
-  if (!currentLine.trim()) return;  // Avoid sending empty or incomplete lines to the API
+  if (!fullCode.trim()) return;  // Avoid sending empty or incomplete content to the API
 
-  // Prepare the API request
-  const apiUrl = 'http://127.0.0.1:5001/v2/chat/';
+  // Prepare the API request to Lyzr
+  const apiUrl = 'https://agent.api.lyzr.app/v2/chat/';
 
   const data = {
-    "user_id": "sudheersrinivasa7@gmail.com",
-    "agent_id": "66f3c0124843e0f97bb0aa0d",
-    "session_id": "323451c7-1f4a-4637-aac4-e0bd65792667",
-    "message": currentLine  // Send only the current line of the editor as the message
+    "user_id": "sudheerpailu@gmail.com",
+    "agent_id": "67028fbba929339fb3236d0f",
+    "session_id": "274b4161-e33e-4d88-a0bb-ca35ddc21323",
+    "message": fullCode  // Send the entire content of the editor as the message
   };
 
   fetch(apiUrl, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-api-key': 'lyzr-x9OjURXQOdRhNi11TBBrXiJP'
     },
     body: JSON.stringify(data)
   })
   .then(response => response.json())
-  .then(data => {
+  .then(async data => {
     if (data && data.response) {
-      const suggestion = extractCodeFromResponse(data.response);
-      showAutocompleteSuggestion(suggestion);  // Show as a hint, not append
+      const lyzrOutput = extractCodeFromResponse(data.response);
+
+      console.log("Lyzr Output Received:", lyzrOutput);
+
+      // Verify the suggestion using OpenAI before applying it
+      const verifiedCode = await verifyLyzrSuggestion(fullCode, lyzrOutput);
+
+      showAutocompleteSuggestion(verifiedCode);  // Show as a hint, not append
     }
   })
   .catch(error => {
@@ -192,19 +157,148 @@ function sendToApiForSuggestion(content) {
   });
 }
 
-// Function to extract code from the response
-function extractCodeFromResponse(response) {
-  return response.trim();
+async function verifyLyzrSuggestion(fullCode, lyzrOutput) {
+  const apiUrl = 'https://api.openai.com/v1/chat/completions';
+  const openAiApiKey = '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';  // Replace with your actual API key
+
+  const requestBody = {
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": `You are given two code inputs. The first input is the 'fullCode' that the user has written. The second input is the 'lyzrOutput' generated by an autocomplete agent. Your task is to validate and clean the 'lyzrOutput'. Follow these rules:
+
+1. Do not suggest lines already present in 'fullCode'. 
+2. Ensure correct indentation is maintained.
+3. Ensure there are no unnecessary explanations, comments, or English sentences in 'lyzrOutput'.
+4. Return only clean, functional code that can be directly added to 'fullCode' without causing errors.
+
+Full code:
+${fullCode}
+
+Lyzr Output:
+${lyzrOutput}
+
+Provide a clean version of 'lyzrOutput' following the rules mentioned above. Return only valid code with no comments or English sentences.`
+      }
+    ],
+    "max_tokens": 500,
+    "temperature": 0.2
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openAiApiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const responseData = await response.json();
+    if (responseData.choices && responseData.choices.length > 0) {
+      let content = responseData.choices[0].message.content;
+
+      // Ensure only valid Python code is kept
+      content = extractCodeFromResponse(content);
+
+      // If necessary, apply indentation correction
+      content = fixIndentation(content);
+
+      console.log("Final verified code after OpenAI processing:", content);
+
+      // Return the cleaned content to replace the fullCode in the editor
+      return content;
+    } else {
+      console.error('Error in OpenAI response:', responseData);
+      return lyzrOutput;  // Return the original Lyzr output if OpenAI fails
+    }
+  } catch (error) {
+    console.error('Error calling OpenAI API:', error);
+    return lyzrOutput;  // Return the original Lyzr output on error
+  }
+}
+
+// Function to extract code without unnecessary comments or explanations
+function extractCodeFromResponse(content) {
+  // Extract the actual code from within code blocks
+  const codeBlockMatch = content.match(/```python([\s\S]*?)```/);
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    return codeBlockMatch[1]; // Return the content inside the code block
+  }
+  return content.replace(/The 'lyzrOutput'.+/, '').trim();  // Fallback: remove unnecessary comments and return
+}
+
+// Function to fix the indentation of the entire block
+function fixIndentation(code) {
+  const lines = code.split('\n');
+  let indentLevel = 0;
+  const indentSize = 4;  // Default indentation size for Python is 4 spaces
+  let fixedCode = '';
+
+  lines.forEach(line => {
+    const trimmedLine = line.trim();
+
+    if (trimmedLine === '') {
+      fixedCode += '\n';
+      return;
+    }
+
+    if (trimmedLine.endsWith(':')) {
+      // Increase the indentation level after a colon (e.g., function or loop declaration)
+      fixedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+      indentLevel += indentSize;
+    } else if (trimmedLine.startsWith('return') || trimmedLine.startsWith('else') || trimmedLine.startsWith('elif')) {
+      // Decrease the indentation level for return, else, and elif
+      indentLevel = Math.max(0, indentLevel - indentSize);
+      fixedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+    } else {
+      // Apply normal indentation
+      fixedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+    }
+  });
+
+  return fixedCode;
+}
+
+
+// Function to filter out lines that are already present in fullCode
+function filterRepeatedLines(fullCode, lyzrOutput) {
+  const fullCodeLines = fullCode.split('\n').map(line => line.trim());
+  const outputLines = lyzrOutput.split('\n');
+
+  const filteredOutput = outputLines.filter(line => {
+    // Do not include lines that are already present in the original code
+    return !fullCodeLines.includes(line.trim());
+  });
+
+  return filteredOutput.join('\n');
 }
 
 // Function to confirm the suggestion when Tab is pressed
-function confirmSuggestion() {
+async function confirmSuggestion() {
   if (currentSuggestion) {
     console.log('Converting ghost text to actual code');
 
-    // Remove ghost text styling and make it part of the actual code
+    // Step 1: Get the current code from the editor
+    let fullCode = editor.getValue();
+    
+    try {
+      // Step 2: Call the Flask API to format the code
+      const formattedCode = await callFormatCodeApi(fullCode);
+
+      // Step 3: Apply the formatted code to the editor
+      applyFormattedCode(formattedCode);
+
+    } catch (error) {
+      console.error('Error formatting the code:', error);
+      alert('Failed to format the code. Please try again.');
+    }
+
+    // Step 4: Remove ghost text styling and make it part of the actual code
     ghostTextRanges.forEach((range) => {
-      console.log('Clearing ghost text at range:', range.find()); 
+      console.log('Clearing ghost text at range:', range.find());
       range.clear();  // Clear the ghost text styling, converting it into regular text
     });
 
@@ -214,6 +308,74 @@ function confirmSuggestion() {
   }
 }
 
+// Function to call the Flask API for code formatting
+async function callFormatCodeApi(fullCode) {
+  const apiUrl = 'http://127.0.0.1:5000/format_code'; // Your Flask API endpoint
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      code: fullCode  // Send the entire current code for formatting
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to format the code');
+  }
+
+  const data = await response.json();
+  return handleIndentationAndSpaces(data.formatted_code);  // Process the returned code with spaces
+}
+
+// Function to apply the formatted code to the editor
+function applyFormattedCode(formattedCode) {
+  editor.setValue(formattedCode);  // Replace the current editor content with the formatted code
+}
+
+// Function to handle indentation and spaces after newlines (\n)
+// Function to handle indentation and spaces after newlines (\n)
+function handleIndentationAndSpaces(code) {
+  // Split the code into individual lines based on newline characters (\n)
+  let lines = code.split('\n');
+  
+  // Variables to keep track of the indentation level and formatted code
+  let indentLevel = 0;
+  const indentSize = 4; // Assuming 4 spaces for Python indentation
+  let formattedCode = '';
+
+  // Loop through each line to adjust the indentation and format it
+  lines.forEach((line, index) => {
+    let trimmedLine = line.trim();
+
+    if (trimmedLine === '') {
+      // Preserve empty lines, keep the newline without adding spaces
+      formattedCode += '\n';
+      return;
+    }
+
+    // Check for keywords that affect indentation (increase/decrease)
+    if (trimmedLine.endsWith(':')) {
+      // If the line ends with a colon, increase the indentation level for the next line
+      formattedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+      indentLevel += indentSize;
+    } else if (trimmedLine.startsWith('return') || trimmedLine.startsWith('else') || trimmedLine.startsWith('elif')) {
+      // Decrease the indentation level for certain keywords
+      indentLevel = Math.max(0, indentLevel - indentSize);
+      formattedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+    } else {
+      // Normal line, apply the current indentation level
+      formattedCode += ' '.repeat(indentLevel) + trimmedLine + '\n';
+    }
+  });
+
+  // Return the properly formatted code with correct indentation and newlines
+  return formattedCode;
+}
+
+
 // Function to remove ghost text (in case it's needed elsewhere, like clearing without confirmation)
 function removeGhostText() {
   if (ghostTextRanges.length) {
@@ -221,7 +383,6 @@ function removeGhostText() {
     ghostTextRanges = [];
   }
 }
-
 
 function showAutocompleteSuggestion(suggestion) {
   if (suggestion === "# No suggestion available") {
@@ -288,7 +449,6 @@ function getCleanedCode() {
   return code;
 }
 
-
 // Add custom CSS to display suggestions in lighter grey
 const suggestionStyle = document.createElement('style');
 suggestionStyle.innerHTML = `
@@ -298,3 +458,4 @@ suggestionStyle.innerHTML = `
   }
 `;
 document.head.appendChild(suggestionStyle);
+
