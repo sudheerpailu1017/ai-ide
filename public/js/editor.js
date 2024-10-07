@@ -125,9 +125,9 @@ function sendToApiForSuggestion(content) {
   const apiUrl = 'https://agent.api.lyzr.app/v2/chat/';
 
   const data = {
-    "user_id": "sudheerpailu@gmail.com",
-    "agent_id": "67028fbba929339fb3236d0f",
-    "session_id": "274b4161-e33e-4d88-a0bb-ca35ddc21323",
+    "user_id": "mahithanaidu00@gmail.com",
+    "agent_id": "6703ba01a929339fb3238ad0",
+    "session_id": "767bc0c9-9c18-4896-99bc-cd71a9a70bb0",
     "message": fullCode  // Send the entire content of the editor as the message
   };
 
@@ -135,7 +135,7 @@ function sendToApiForSuggestion(content) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': 'lyzr-x9OjURXQOdRhNi11TBBrXiJP'
+      'x-api-key': 'lyzr-q5hOjOIWxTdGhYCZe1hWcfjr'
     },
     body: JSON.stringify(data)
   })
