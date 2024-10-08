@@ -5,6 +5,8 @@ import logging, re, requests
 from openai import OpenAI
 from flask_socketio import SocketIO
 from flask_cors import CORS, cross_origin
+import subprocess
+import autopep8
 
 
 app = Flask(__name__, static_folder='../public', template_folder='../templates')
@@ -58,7 +60,7 @@ def fallback_code():
 
     # Create the prompt for the model
     prompt = f"""
-    The following Python code needs to be checked for proper indentation. 
+    The following Python code needs to be checked for proper indentation. check the if and return and before returning the code make sure you share the working one if its runs then only share it.
     Return only the corrected code without adding or removing any lines.
     Do not add new code or explanations, and return only the valid, corrected Python code:
 
@@ -81,19 +83,40 @@ def fallback_code():
         # Clean the code of any markdown code fences
         cleaned_code = clean_code_blocks(corrected_code)
 
-        # Fix indentation issues
-        formatted_code = validate_and_fix_indentation(cleaned_code)
+        # Fix indentation issues with AutoPEP8
+        formatted_code = autopep8.fix_code(cleaned_code)
 
         # Log the corrected code
         logging.info(f"Corrected and formatted code:\n{formatted_code}")
 
-        return jsonify({'corrected_code': formatted_code})
+        # Run the code to check if it works
+        if check_code_execution(formatted_code):
+            return jsonify({'corrected_code': formatted_code})
+        else:
+            return jsonify({'error': 'The corrected code does not run successfully.'}), 400
 
     except Exception as e:
         logging.error(f"Error during OpenAI request: {e}")
         return jsonify({'error': 'Failed to process the request'}), 500
 
 
+def check_code_execution(code):
+    """
+    Check if the code can be executed successfully.
+    """
+    try:
+        # Execute the code in a separate Python process to see if it runs without errors
+        exec(code, {})
+        return True
+    except IndentationError as e:
+        logging.error(f"Indentation error in code: {e}")
+        return False
+    except SyntaxError as e:
+        logging.error(f"Syntax error in code: {e}")
+        return False
+    except Exception as e:
+        logging.error(f"Code execution failed: {e}")
+        return False
 # Function to format Python code with proper indentation and clean formatting
 def format_code(code):
     lines = code.split('\n')  # Split code into individual lines
@@ -136,7 +159,6 @@ def clean_code_blocks(code):
     Remove markdown code block tags from the code.
     """
     return code.replace('```python', '').replace('```', '').strip()
-
 
 def call_fallback_for_indentation(code):
     """
