@@ -240,39 +240,34 @@ function extractCodeFromResponse(content) {
 
 // Function to confirm the suggestion when Tab is pressed
 async function confirmSuggestion() {
+  removeGhostText();  // Clear previous ghost text if it exists
   if (currentSuggestion) {
     console.log('Converting ghost text to actual code');
     console.log("Current suggestion:", currentSuggestion);
 
-    // Step 1: Get the current code from the editor
+    // Step 1: Get the current code from the editor (before confirming the suggestion)
     let fullCode = editor.getValue();
-    console.log("Full code before formatting:", fullCode);
+    console.log("Full code before confirming the suggestion:", fullCode);
 
-    try {
-      // Step 2: Call the Flask API to format the code
-      const formattedCode = await callFormatCodeApi(fullCode);
-      console.log("Formatted code returned from API:", formattedCode);
-
-      // Step 3: Apply the formatted code to the editor
-      applyFormattedCode(formattedCode);
-
-    } catch (error) {
-      console.error('Error formatting the code:', error);
-      alert('Failed to format the code. Please try again.');
-    }
-
-    // Step 4: Remove ghost text styling and make it part of the actual code
+    // Step 2: Remove ghost text styling and make it part of the actual code
     ghostTextRanges.forEach((range) => {
-      console.log('Clearing ghost text at range:', range.find());
-      range.clear();  // Clear the ghost text styling, converting it into regular text
+      const rangeInfo = range.find();
+      if (rangeInfo) {
+        const ghostText = editor.getRange(rangeInfo.from, rangeInfo.to);
+        console.log('Confirming ghost text at range:', ghostText);
+        range.clear();  // Convert the ghost text into actual code by clearing the ghost style
+      }
     });
 
-    ghostTextRanges = [];  // Clear the ranges as the ghost text is now actual code
+    // Step 3: Clear the ghost text ranges as it's now part of the actual code
+    ghostTextRanges = [];
     currentSuggestion = '';  // Clear the current suggestion
     suggestionActive = false;  // Mark the suggestion as inactive
+
     console.log("Suggestion confirmed and applied to the code.");
   }
 }
+
 
 
 
@@ -349,30 +344,33 @@ function showAutocompleteSuggestion(suggestion) {
   console.log("Original suggestion received from backend:", suggestion);
 
   const cursor = editor.getCursor();  // Get the current cursor position
-  const currentLine = editor.getLine(cursor.line);  // Get the current line of code
 
-  removeGhostText();  // Clear previous ghost text if it exists
+  // removeGhostText();  // Clear previous ghost text if it exists
 
   // Split the suggestion into lines as it may have multiple lines of code
   const suggestionLines = suggestion.split('\n');
 
+  // Loop through each suggestion line and insert it as ghost text without altering the indentation
   suggestionLines.forEach((line, i) => {
-    const lineIndex = cursor.line + i;
-    
-    // Directly replace the current line with the suggestion
-    editor.replaceRange(line + '\n', { line: lineIndex, ch: 0 });
+    const lineIndex = cursor.line + i + 1;  // Place the suggestion on the next line
+    editor.replaceRange(`\n${line}`, { line: lineIndex, ch: 0 });
+
+    // Mark the text as ghost text (not yet confirmed by user)
+    const range = editor.markText(
+      { line: lineIndex, ch: 0 },
+      { line: lineIndex, ch: line.length },
+      { className: "ghost-suggestion" }
+    );
+    ghostTextRanges.push(range);  // Track ghost text ranges for removal later
   });
 
-  // Move the cursor to the end of the suggestion
-  const lastLine = cursor.line + suggestionLines.length - 1;
-  const lastChar = suggestionLines[suggestionLines.length - 1].length;
-  editor.setCursor({ line: lastLine, ch: lastChar });
-
-  currentSuggestion = suggestion;
+  currentSuggestion = suggestion;  // Store the current suggestion
   suggestionActive = true;
 
-  console.log("Suggestion applied directly from backend.");
+  console.log("Suggestion applied as ghost text.");
 }
+
+
 
 
 function getCleanedCode() {
