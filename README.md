@@ -9,7 +9,7 @@ AI-IDE is a browser-based Integrated Development Environment (IDE) powered by Ly
 ### **AI-Powered Code Generation**
 AI-IDE leverages Lyzr AI (GPT-4o-mini) to generate, optimize, and enhance code based on natural language inputs. Whether you need to create algorithms like quicksort or handle complex logic, the AI writes optimized and efficient code seamlessly, boosting productivity by automating repetitive tasks and providing ready-to-use solutions.
 
-![Code Generation](https://github.com/user-attachments/assets/19a08a54-000c-4898-9b9e-0c5a7743d0f9)
+https://github.com/user-attachments/assets/19a08a54-000c-4898-9b9e-0c5a7743d0f9
 
 ---
 
@@ -23,12 +23,14 @@ To improve code readability and debugging, AI-IDE includes built-in syntax highl
 ### **Intelligent Autocomplete**
 AI-IDE’s intelligent autocomplete suggests code as you type, reducing the need for manual writing. This feature improves speed and accuracy by predicting what you’re going to write next, whether it's completing code fragments or entire functions, saving time and reducing errors.
 
-![Autocomplete](https://github.com/user-attachments/assets/507cc11f-c945-4a41-9af3-51e34b8c4269)
+https://github.com/user-attachments/assets/507cc11f-c945-4a41-9af3-51e34b8c4269
 
 ---
 
 ### **Real-Time Code Testing**
 AI-IDE integrates Pyodide to run Python code directly within the IDE, providing real-time output and debugging. This feature gives instant feedback as you build your project, enabling continuous testing and troubleshooting throughout the development process.
+
+https://github.com/user-attachments/assets/bd33c819-1950-437d-b730-1d636a0a4323
 
 ---
 
@@ -42,7 +44,7 @@ AI-IDE supports multiline editing, allowing developers to refactor or rewrite mu
 ### **Smart Rewrites**
 Even if you type inaccurately or incompletely, AI-IDE automatically rewrites and fixes common coding mistakes. This intelligent correction system ensures clean, functional code, letting you focus on higher-level logic instead of syntax issues.
 
-![Smart Rewrites](https://github.com/user-attachments/assets/fd54a499-dbbd-4043-83b2-ed51cf27f81e)
+https://github.com/user-attachments/assets/fd54a499-dbbd-4043-83b2-ed51cf27f81e
 
 ---
 
