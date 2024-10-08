@@ -242,13 +242,16 @@ function extractCodeFromResponse(content) {
 async function confirmSuggestion() {
   if (currentSuggestion) {
     console.log('Converting ghost text to actual code');
+    console.log("Current suggestion:", currentSuggestion);
 
     // Step 1: Get the current code from the editor
     let fullCode = editor.getValue();
-    
+    console.log("Full code before formatting:", fullCode);
+
     try {
       // Step 2: Call the Flask API to format the code
       const formattedCode = await callFormatCodeApi(fullCode);
+      console.log("Formatted code returned from API:", formattedCode);
 
       // Step 3: Apply the formatted code to the editor
       applyFormattedCode(formattedCode);
@@ -267,8 +270,11 @@ async function confirmSuggestion() {
     ghostTextRanges = [];  // Clear the ranges as the ghost text is now actual code
     currentSuggestion = '';  // Clear the current suggestion
     suggestionActive = false;  // Mark the suggestion as inactive
+    console.log("Suggestion confirmed and applied to the code.");
   }
 }
+
+
 
 // Function to call the Flask API for code formatting
 async function callFormatCodeApi(fullCode) {
@@ -340,35 +346,32 @@ function showAutocompleteSuggestion(suggestion) {
     return;
   }
 
+  console.log("Original suggestion received from backend:", suggestion);
+
   const cursor = editor.getCursor();  // Get the current cursor position
   const currentLine = editor.getLine(cursor.line);  // Get the current line of code
 
-  const insideFunction = currentLine.trim().endsWith(':');
-
-  const suggestionLines = suggestion.split('\n');
-  const currentIndentation = currentLine.match(/^\s*/)[0];  // Get current line's indentation
-
   removeGhostText();  // Clear previous ghost text if it exists
 
+  // Split the suggestion into lines as it may have multiple lines of code
+  const suggestionLines = suggestion.split('\n');
+
   suggestionLines.forEach((line, i) => {
-    let indentedLine = line.trim();
-
-    if (insideFunction) {
-      indentedLine = `${currentIndentation}    ${line.trim()}`;  // Indent suggestion (4 spaces extra)
-    }
-
-    const lineIndex = cursor.line + i + 1;
-    editor.replaceRange(`\n${indentedLine}`, { line: lineIndex, ch: 0 });
-
-    const range = editor.markText(
-      { line: lineIndex, ch: 0 },
-      { line: lineIndex, ch: indentedLine.length },
-      { className: "ghost-suggestion" }
-    );
-    ghostTextRanges.push(range);
+    const lineIndex = cursor.line + i;
+    
+    // Directly replace the current line with the suggestion
+    editor.replaceRange(line + '\n', { line: lineIndex, ch: 0 });
   });
+
+  // Move the cursor to the end of the suggestion
+  const lastLine = cursor.line + suggestionLines.length - 1;
+  const lastChar = suggestionLines[suggestionLines.length - 1].length;
+  editor.setCursor({ line: lastLine, ch: lastChar });
+
   currentSuggestion = suggestion;
   suggestionActive = true;
+
+  console.log("Suggestion applied directly from backend.");
 }
 
 
