@@ -7,6 +7,8 @@ from flask_socketio import SocketIO
 from flask_cors import CORS, cross_origin
 import subprocess
 import autopep8
+import os
+from cryptography.fernet import Fernet
 
 
 app = Flask(__name__, static_folder='../public', template_folder='../templates')
@@ -24,7 +26,58 @@ logging.basicConfig(level=logging.INFO)
 def home():
     return render_template('index.html')
 
-client = OpenAI(api_key="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")
+
+
+def load_api_key():
+    # Log the current working directory
+    logging.info(f"Current working directory: {os.getcwd()}")
+
+    # Log that we're starting to load the encryption key
+    logging.info("Loading the encryption key...")
+
+    try:
+        # Log the expected path for the secret key
+        secret_key_path = os.path.join(os.getcwd(), "secret.key")
+        logging.info(f"Looking for secret.key at: {secret_key_path}")
+
+        # Load the encryption key
+        with open(secret_key_path, "rb") as key_file:
+            key = key_file.read()
+            logging.info("Encryption key successfully loaded.")
+            print(f"Encryption Key: {key}")
+
+        # Create a Fernet cipher object
+        cipher_suite = Fernet(key)
+        logging.info("Cipher object created.")
+
+    except Exception as e:
+        logging.error(f"Failed to load the encryption key: {e}")
+        raise
+
+    try:
+        # Log the expected path for the encrypted API key
+        encrypted_api_key_path = os.path.join(os.getcwd(), "encrypted_api_key.txt")
+        logging.info(f"Looking for encrypted_api_key.txt at: {encrypted_api_key_path}")
+
+        # Load the encrypted API key
+        logging.info("Loading the encrypted API key...")
+        with open(encrypted_api_key_path, "rb") as encrypted_file:
+            encrypted_api_key = encrypted_file.read()
+            logging.info("Encrypted API key successfully loaded.")
+            print(f"Encrypted API Key: {encrypted_api_key}")
+
+        # Decrypt the API key
+        api_key = cipher_suite.decrypt(encrypted_api_key).decode()
+        logging.info("API key successfully decrypted.")
+        print(f"Decrypted API Key: {api_key}")
+
+        return api_key
+
+    except Exception as e:
+        logging.error(f"Failed to load or decrypt the API key: {e}")
+        raise
+
+client = OpenAI(api_key=load_api_key())
 
 # Fallback API to check and correct code using GPT-4o-mini
 def validate_and_fix_indentation(code):
