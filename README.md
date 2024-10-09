@@ -64,20 +64,17 @@ Lyzr AI (GPT-4o-mini) plays a key role in AI-IDE by automating essential coding 
    cd ai-ide
 3. **Install Dependencies**
    ```bash
-   pip install -r requirements.txt
-4. Run the Application
-Start the Flask server:python app.py
+   pip install -r src/requirements.txt
+4. **Run the Application**
+   Start the Flask server:
+   ```bash
+   python src/app.py
 5. Open in Browser and go to: http://localhost:5000
 
 ---
 
 ## **Contribution**
 Contributions are welcome! If you'd like to add features, improve existing code, or fix bugs, feel free to fork the repository and submit a pull request.
-
----
-
-## **License**
-This project is licensed under the MIT License. See the LICENSE file for more details.
 
 ---
 
